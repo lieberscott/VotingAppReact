@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+
 const bodyparser = require('body-parser');
 const expressJwt = require('express-jwt');
 const jwt = require('jsonwebtoken');
@@ -10,9 +11,6 @@ const ObjectId = require('mongodb').ObjectID;
 const passport = require('passport');
 const request = require('request');
 
-const passportConfig = require('./passport');
-passportConfig();
-
 // cors
 const cors = require('cors');
 const corsOption = {
@@ -22,10 +20,14 @@ const corsOption = {
   exposedHeaders: ['x-auth-token']
 };
 
+const passportConfig = require('./passport');
+passportConfig();
+
+
 // jsonwebtokens functions
 const createToken = (auth) => {
   console.log("createtoken auth : ", auth);
-  return jwt.sign({ id: auth.id }, process.env.SECRET, { expiresIn: "10h" });
+  return jwt.sign({ id: auth.id, displayName: auth.displayName, username: auth.username }, process.env.SECRET, { expiresIn: "10h" });
 };
 
 const generateToken =  (req, res, next) => {
@@ -48,6 +50,7 @@ const authenticate = expressJwt({
     return null;
   }
 });
+
 
 app.use(cors(corsOption));
 app.use(bodyparser.urlencoded({ extended: true }));
@@ -76,7 +79,7 @@ let PollSchema = new Schema({
 
 let Poll = mongoose.model("Poll", PollSchema);
 
-// app.set('view engine', 'pug');
+mongoose.connect(process.env.DATABASE, { useNewUrlParser: true });
 
 mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => {
   
@@ -85,12 +88,74 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
     
     let db = client.db('freecodecamp2018');
     
+    app.route('/answer')
+    .post(/* verifyToken, */(req, res) => {
+      /* req.headers.authorization is the jwt token */
+      /* header 'authorization' was set in the Chart component, in the onSubmit function */
+      /* we use jwt.verify to decode the info we need from the token,
+         since we are not using sessions (for simplicity) */
+      
+      let id = "";
+      let display_name = "";
+      let username = "";
+      let verified = false;
+      
+      jwt.verify(req.headers.authorization, process.env.SECRET, (err, authData) => {
+        if (err) {
+          console.log("verify err");
+        }
+        else {
+          console.log("authdata : ", authData);
+          verified = true;
+          id = authData.id;
+          display_name = authData.displayName;
+          username = authData.username;
+        }
+      })
+
+      let referer = req.headers.referer; // url, which includes the mongo ID at the end
+      let regex = /polls\//; // regex to split the url to isolate the mongo ID
+      let poll_id = referer.split(regex)[1];
+
+      let answer = req.headers.answer;
+      let ip = req.ip;
+
+      let poll = Poll.findByIdAndUpdate(poll_id, { $addToSet: { answeredIPs: ip, answeredUsers: id } }, (err, data) => {
+        if (err) {
+          console.log(err);
+          res.sendStatus(403);
+        }
+        else {
+          let answers = data.answers;
+          let len = answers.length;
+          let add = true; // add the answer to the array, pending results of ensuing for-loop
+          console.log(answers);
+
+          // check all the answers in database, if one is equal to the new answer submitted, change add to false and increment vote total
+          for (let i = 0; i < len; i++) {
+            if (answers[i].option == answer) {
+              answers[i].votes = answers[i].votes + 1;
+              add = false;
+              break;
+            }
+          }
+
+          if (add) { // user-generated answer is not already in database
+            answers.push({ option: answer, votes: 1 });
+          }
+
+          data.save();
+          res.json({ status: "success" });
+        }
+      })
+    });
+
     app.route('/auth/twitter/reverse')
     .post((req, res) => {
       request.post({
         url: 'https://api.twitter.com/oauth/request_token',
         oauth: {
-          oauth_callback: "http://right-recorder.me/auth/twitter", // /callback
+          oauth_callback: "http://delirious-stem.me/auth/twitter", // /callback
           consumer_key: process.env.TWITTER_CONSUMER_KEY,
           consumer_secret: process.env.TWITTER_CONSUMER_SECRET
         }
@@ -131,43 +196,41 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
 
         // prepare token for API
         req.auth = {
-          id: req.user.id
+          id: req.user.id,
+          displayName: req.user.displayName,
+          username: req.user.username
         };
 
         return next();
     }, generateToken, sendToken);
     
+    
     app.route("/createpoll")
-    .post(verifyToken, async (req, res) => {
-      
-      let user_id = "";
+    .post(/* verifyToken, */ (req, res) => {
+
+      let id = "";
       let display_name = "";
       let username = "";
       let email = "";
       let verified = false;
       
-      
-      jwt.verify(req.token, process.env.SECRET, (err, authData) => {
+      jwt.verify(req.headers.authorization, process.env.SECRET, (err, authData) => {
         if (err) {
+          console.log("Error");
           res.sendStatus(403);
         }
         else {
-          console.log("authdata : ", authData);
           verified = true;
-          user_id = authData.user_id;
+          id = authData.id;
           display_name = authData.displayName;
           username = authData.username;
         }
       })
       
-      // FOR FORM TO WORK: in server.js file
-      // Need body-parser
-      // Need app.use(bodyparser.urlencoded({ extended: true }));
-      // Not for this app, but for others, you may need app.use(bodyParser.json());    
-      let regex = /\r\n?|\n/g; // \r, \r\n, or \n (line break varies based on operating system)
-      let title = req.body.title;
-      let string = req.body.answers;
-      let answers = string.split(regex); // array
+      let title = req.headers.title;
+      let string = req.headers.answers;
+      let answers = string.split(",");
+      
       let provider = "twitter";
 
       let answersArr = [];
@@ -180,12 +243,14 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
         answersArr.push(obj);
       }
       
+      console.log(answersArr);
+      
       if (verified) {
 
         let newentry = new Poll({
           title,
           answers: answersArr,
-          created_by: user_id,
+          created_by: id,
           details: {
             display_name,
             username,
@@ -194,11 +259,12 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
           }
         });
 
-        let result = await newentry.save((err, data) => {
+        let result = newentry.save((err, data) => {
           if (err) { console.log(err) }
-          else { return res.status(200).send({ result: "success" }); } // will be sent to ajax request for redirect to profile page
+          else { return res.status(200).send({ result: "success" }); }
         });
       }
+      
     });
     
     app.route("/findpoll/:pollnumber")
@@ -213,12 +279,14 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
       });
     });
     
+    
     app.route("/getip")
     .get((req, res) => {
       let ip = req.ip;
       res.send({ ip });
     });
-
+    
+    
     app.route("/getpolls")
     .get(async (req, res) => {
       let polls = [];
@@ -227,20 +295,16 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
         res.send({ polls });
       });
     });
-    
-    app.route("/logout")
-    .get((req, res) => {
-      req.logout();
-      res.redirect("/");
-    })
-    
-    app.get("*", (req, res) => {
-      let ip = req.ip;
-      res.sendFile(__dirname + '/app/index.html', { ip });
+
+
+    // http://expressjs.com/en/starter/basic-routing.html
+    app.get("*", function(request, response) {
+      response.sendFile(__dirname + '/app/index.html');
     });
   }
-  
-  function verifyToken(req, res, next) { // middelware to prevent user from manually typing into address bar url.com/profile
+})
+
+function verifyToken(req, res, next) { // middelware to prevent user from manually typing into address bar url.com/profile
     const bearerHeader = req.headers['authorization'];
     console.log(req.headers);
     console.log(bearerHeader);
@@ -257,9 +321,8 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
     }
   };
   
-});
 
 // listen for requests :)
-const listener = app.listen(process.env.PORT, () => {
+const listener = app.listen(process.env.PORT, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });

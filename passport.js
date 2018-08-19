@@ -11,11 +11,10 @@ module.exports = () => {
       includeEmail: true
     },
     (token, tokenSecret, profile, done) => {
-    console.log("profile : ", profile);
       let userinfo = {
         displayName: profile.displayName,
         id: profile.id,
-        name: profile.displayName
+        username: profile.username
       };
       return done(null, userinfo);
     }));
