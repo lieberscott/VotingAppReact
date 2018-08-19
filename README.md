@@ -1,11 +1,11 @@
-Starter React Router App on Glitch
-==================================
+Starter React Redux App on Glitch
+=================================
 
-This app is a very small scaffold to get you started using React Router for client-side routing, and it's a remix of [starter-react](https://starter-react.glitch.me).
+This app is a very small scaffold to get you started using Redux with React, and it's a remix of [starter-react-router](https://starter-react-.glitch.me).
 
-This project relates to video 3 of 5 in the [React Starter Kit](https://glitch.com/react-starter-kit) video series.
+This project relates to video 4 of 5 in the [React Starter Kit](https://glitch.com/react-starter-kit) video series.
 
-[![](https://cdn.glitch.com/6ca79164-3a1d-4196-a22c-3f64876db399%2Freact-router.png?1513175186906)](https://www.youtube.com/watch?v=1CqzaPTblcQ)
+[![](https://cdn.glitch.com/7416f09f-3fb8-4d64-a222-f533d74a29fa%2Freact-redux.png?1513175252007)](https://youtu.be/M4bqyGj-rYw)
 
 Click `Show` in the header to see your app live. Updates to your code will instantly deploy and update live.
 

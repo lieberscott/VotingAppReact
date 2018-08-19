@@ -2,9 +2,9 @@
   "//1": "describes your app and its dependencies",
   "//2": "https://docs.npmjs.com/files/package.json",
   "//3": "updating this file will download and update your packages",
-  "name": "starter-react-router",
+  "name": "starter-react-redux",
   "version": "0.0.1",
-  "description": "Get started using React Router for client-side routing",
+  "description": "A starter app for using Redux to manage state in React",
   "main": "server.js",
   "scripts": {
     "build": "webpack",
@@ -27,14 +27,13 @@
     "mongoose": "^5.2.8",
     "passport": "^0.4.0",
     "passport-twitter-token": "^1.3.0",
-    "pug": "^2.0.3",
     "react": "^16.2.0",
-    "react-chartjs-2": "^2.7.4",
     "react-dom": "^16.2.0",
     "react-router-dom": "^4.2.2",
-    "react-twitter-auth": "^0.0.12",
-    "reactstrap": "^6.3.1",
     "react-redux": "^5.0.7",
+    "react-twitter-auth": "^0.0.12",
+    "react-chartjs-2": "^2.7.4",
+    "reactstrap": "^6.4.0",
     "redux": "^3.7.2",
     "request": "^2.88.0",
     "webpack": "^4.1.1",
@@ -44,7 +43,7 @@
     "node": "8.x"
   },
   "repository": {
-    "url": "https://glitch.com/edit/#!/starter-react-router"
+    "url": "https://glitch.com/edit/#!/starter-react-redux"
   },
   "license": "MIT",
   "keywords": [
