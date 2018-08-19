@@ -105,7 +105,6 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
           console.log("verify err");
         }
         else {
-          console.log("authdata : ", authData);
           verified = true;
           id = authData.id;
           display_name = authData.displayName;
@@ -129,7 +128,6 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
           let answers = data.answers;
           let len = answers.length;
           let add = true; // add the answer to the array, pending results of ensuing for-loop
-          console.log(answers);
 
           // check all the answers in database, if one is equal to the new answer submitted, change add to false and increment vote total
           for (let i = 0; i < len; i++) {
@@ -145,7 +143,7 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
           }
 
           data.save();
-          res.json({ status: "success" });
+          res.json({ result: "success" });
         }
       })
     });
@@ -155,7 +153,7 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
       request.post({
         url: 'https://api.twitter.com/oauth/request_token',
         oauth: {
-          oauth_callback: "http://delirious-stem.me/auth/twitter", // /callback
+          oauth_callback: "http://voting-machine.me/auth/twitter", // /callback
           consumer_key: process.env.TWITTER_CONSUMER_KEY,
           consumer_secret: process.env.TWITTER_CONSUMER_SECRET
         }
@@ -242,9 +240,7 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
         obj.votes = 0;
         answersArr.push(obj);
       }
-      
-      console.log(answersArr);
-      
+            
       if (verified) {
 
         let newentry = new Poll({

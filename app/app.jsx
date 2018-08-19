@@ -14,7 +14,7 @@ const userinfo = require('./reducers');
 let store = createStore(userinfo);
 
 /* Import Components */
-const App = require('./components/App');
+const AppContainer = require('./containers/AppContainer');
 const ChartContainer = require('./containers/ChartContainer');
 const NewpollContainer = require('./containers/NewpollContainer');
 
@@ -22,7 +22,7 @@ render((
   <Provider store={store}>
     <BrowserRouter>
       <div>
-        <Route exact path="/" component={App}/>
+        <Route exact path="/" component={AppContainer}/>
         <Route path="/polls/:pollnumber" component={ChartContainer}/>
         <Route path="/newpoll" component={NewpollContainer}/>
       </div>

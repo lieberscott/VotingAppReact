@@ -6,11 +6,12 @@ module.exports = {
   
   LOGOUT: 'LOGOUT',
   
-  login: function(token, user) {
+  login: function(token, user, name) {
     return {
       type: this.LOGIN,
       token: token,
-      user: user
+      user: user,
+      name: name
     }
   },
   
