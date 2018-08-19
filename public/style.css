@@ -65,6 +65,11 @@ td a:hover {
   width: 100%;
 }
 
+.numvotes {
+  color: darkslategray;
+  font-size: 14px;
+}
+
 .subhead {
   display: flex;
   font-family: 'Questrial', sans-serif;

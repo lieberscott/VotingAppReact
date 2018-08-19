@@ -12,7 +12,7 @@ class App extends React.Component {
   }
   
   componentDidMount() {
-    let url = '/getpolls';
+    let url = '/mypolls/' + this.props.user;
     fetch(url)
     .then((res) => res.json())
     .then((json) => {
@@ -36,11 +36,7 @@ class App extends React.Component {
             </div>
             <div className="col-lg-9">
               <span className="headline">Welcome to the Voting Machine</span>
-              <span className="subhead">Select a poll to see results and vote or
-                { this.props.loggedIn ?
-                  <Link to="/newpoll">&nbsp;start a new poll!</Link> :
-                  " sign in to start a new poll" }
-              </span>
+              <span className="subhead">Here are all your polls</span>
             </div>
           </div>
           <table className="table" id="polltable">

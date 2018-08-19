@@ -286,7 +286,17 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
     app.route("/getpolls")
     .get(async (req, res) => {
       let polls = [];
-      let cursor = await db.collection('polls').find({}).project({ title: 1 }); // in Mongo, project is how to return specified fields
+      let cursor = await db.collection('polls').find({}).project({ title: 1, answers: 1 }); // in Mongo, project is how to return specified fields
+      cursor.forEach((doc) => polls.push(doc), () => {
+        res.send({ polls });
+      });
+    });
+    
+    app.route("/mypolls/:userid")
+    .get(async (req, res) => {
+      let userid = req.params.userid;
+      let polls = [];
+      let cursor = await db.collection('polls').find({ created_by: userid }).project({ title: 1, answers: 1 }); // in Mongo, project is how to return specified fields
       cursor.forEach((doc) => polls.push(doc), () => {
         res.send({ polls });
       });

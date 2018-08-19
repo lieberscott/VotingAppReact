@@ -7,6 +7,7 @@ const Label = require('reactstrap').Label;
 const Input = require('reactstrap').Input;
 const FormText = require('reactstrap').FormText;
 const TopContainer = require('../containers/TopContainer');
+import { Redirect } from 'react-router-dom';
 
 // import { Button, Form, FormGroup, Label, Input, FormText } from 'reactstrap';
 
@@ -32,7 +33,8 @@ class Chart extends React.Component {
       selection: "", // text from custom answer,
       user: null, // Twitter login number
       token: this.props.token,
-      custom: false
+      custom: false,
+      redirect: false
     };
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -62,7 +64,8 @@ class Chart extends React.Component {
         answeredIPs: json.poll[0].answeredIPs,
         answeredUsers: json.poll[0].answeredUsers,
         answers: answers,
-        votes: votes
+        votes: votes,
+        redirect: false
       });
     });
     
@@ -91,7 +94,8 @@ class Chart extends React.Component {
       .then((res) => res.json())
       .then((json) => {
         if (json.result == "success") {
-          this.setState({ redirect: true }); // redirects in render to same poll, but with updated vote
+          alert("Your vote has been tallied!");
+          this.setState({ redirect: true });
         }
         else {
           alert("There was an error with your submission. Please try again.");
@@ -108,8 +112,9 @@ class Chart extends React.Component {
   }
 
   render() {
+    
     if (this.state.redirect) {
-      return <Redirect to={ "/polls" + this.props.match.params.pollnumber } />
+      return <Redirect to={ "/" } />;
     }
     
     return (
@@ -117,7 +122,7 @@ class Chart extends React.Component {
         <TopContainer />
         <div className="display">
           <div className="row">
-            <div className="col-md-5">
+            <div className="col-lg-5">
               <p>{ this.state.title }</p>
               <Form id="answer" onSubmit={ this.handleSubmit } className="width">
                 <FormGroup>
@@ -138,7 +143,7 @@ class Chart extends React.Component {
                 </a>
               </Form>
             </div>
-            <div className="col-md-7">
+            <div className="col-lg-7">
               <div className="canvas text-center">
                 <Pie
                   data={ this.state.chartData }

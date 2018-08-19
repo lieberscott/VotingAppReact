@@ -17,14 +17,16 @@ let store = createStore(userinfo);
 const AppContainer = require('./containers/AppContainer');
 const ChartContainer = require('./containers/ChartContainer');
 const NewpollContainer = require('./containers/NewpollContainer');
+const MypollsContainer = require('./containers/MypollsContainer');
 
 render((
   <Provider store={store}>
     <BrowserRouter>
       <div>
-        <Route exact path="/" component={AppContainer}/>
-        <Route path="/polls/:pollnumber" component={ChartContainer}/>
-        <Route path="/newpoll" component={NewpollContainer}/>
+        <Route exact path="/" component={ AppContainer }/>
+        <Route path="/polls/:pollnumber" component={ ChartContainer }/>
+        <Route path="/newpoll" component={ NewpollContainer }/>
+        <Route path="/mypolls" component={ MypollsContainer }/>
       </div>
     </BrowserRouter>
   </Provider>), document.getElementById('main'));
