@@ -9,14 +9,16 @@ function userinfo(state = [], action) {
         ...state,
         loggedIn: true,
         token: action.token,
-        user: action.user
+        user: action.user,
+        name: action.name
       });
     case LOGOUT:
       return Object.assign({}, state, {
         ...state,
         loggedIn: false,
         token: null,
-        user: null
+        user: null,
+        name: null
       });
     default:
       return state;

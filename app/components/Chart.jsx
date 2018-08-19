@@ -90,7 +90,12 @@ class Chart extends React.Component {
       fetch("/answer", { method: "POST", headers: myHeaders})
       .then((res) => res.json())
       .then((json) => {
-        console.log(json);
+        if (json.result == "success") {
+          this.setState({ redirect: true }); // redirects in render to same poll, but with updated vote
+        }
+        else {
+          alert("There was an error with your submission. Please try again.");
+        }
       })
     }
   }
@@ -102,48 +107,59 @@ class Chart extends React.Component {
     else { this.setState({ custom: false }) }
   }
 
-  render() {    
+  render() {
+    if (this.state.redirect) {
+      return <Redirect to={ "/polls" + this.props.match.params.pollnumber } />
+    }
+    
     return (
       <div>
         <TopContainer />
-        <div className="row">
-          <div className="col-md-5">
-            <p>{ this.state.title }</p>
-          <Form id="answer" onSubmit={ this.handleSubmit }>
-            <FormGroup>
-            <Label for="select">Select</Label>
-              <Input type="select" name="select" id="select" onClick={ this.handleClick } onChange={(e) => this.change(e) }>
-                <option>Select</option>
-                { this.state.chartData.labels.map((item, ind) => {
-                  return ( <option>{ item }</option> );
-                })}
-                { this.props.loggedIn ? <option>I'd like a custom answer</option> : "" }
-              </Input>
-              { this.props.loggedIn ? "" : <span>Or sign in to choose a custom option</span> }
-              { this.state.custom && this.props.loggedIn ? <Input placeholder="Your answer" name="custom"></Input> : "" }
-            </FormGroup>
-            <Button type="submit">Submit</Button>
-          </Form>
-          </div>
-          <div className="canvas text-center">
-            <Pie
-              data={ this.state.chartData }
-              options={{
-                animation: { animateScale: true },
-                cutoutPercentage: 50,
-                maintainAspectRatio: false,
-                responsive: true,
-                tooltips: {
-                  callbacks: {
-                    label: (tooltipItem, data) => {
-                      // let label = "hello";
-                      let label = this.state.answers[tooltipItem.index] + ": " + this.state.votes[tooltipItem.index];
-                      return label;
+        <div className="display">
+          <div className="row">
+            <div className="col-md-5">
+              <p>{ this.state.title }</p>
+              <Form id="answer" onSubmit={ this.handleSubmit } className="width">
+                <FormGroup>
+                <Label for="select">Select</Label>
+                  <Input type="select" name="select" id="select" onClick={ this.handleClick } onChange={(e) => this.change(e) }>
+                    <option>Select</option>
+                    { this.state.chartData.labels.map((item, ind) => {
+                      return ( <option>{ item }</option> );
+                    })}
+                    { this.props.loggedIn ? <option>I'd like a custom answer</option> : "" }
+                  </Input>
+                  { this.props.loggedIn ? "" : <span>Or sign in to choose a custom option</span> }
+                  { this.state.custom && this.props.loggedIn ? <Input placeholder="Your answer" name="custom"></Input> : "" }
+                </FormGroup>
+                <Button outline color="success" type="submit" className="buttonwidth">Submit</Button>
+                <a target="_blank" href={"https://twitter.com/intent/tweet?&text=" + this.state.title + "&url=https://voting-machine.glitch.me/" + this.props.match.params.pollnumber }>
+                  <Button onClick={ this.tweet } color="primary" className="buttonwidth">Share on Twitter</Button>
+                </a>
+              </Form>
+            </div>
+            <div className="col-md-7">
+              <div className="canvas text-center">
+                <Pie
+                  data={ this.state.chartData }
+                  options={{
+                    animation: { animateScale: true },
+                    cutoutPercentage: 50,
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    tooltips: {
+                      callbacks: {
+                        label: (tooltipItem, data) => {
+                          // let label = "hello";
+                          let label = this.state.answers[tooltipItem.index] + ": " + this.state.votes[tooltipItem.index];
+                          return label;
+                        }
+                      }
                     }
-                  }
-                }
-              }}
-            />
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

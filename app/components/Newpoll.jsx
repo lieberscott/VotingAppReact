@@ -38,7 +38,7 @@ class Newpoll extends React.Component {
       fetch("/createpoll", { method: "POST", headers: myHeaders })
       .then((res) => res.json())
       .then((json) => {
-        if (json.status.status == "success") {
+        if (json.result == "success") {
           this.setState({ redirect: true });
           alert("Your poll was added");
         }

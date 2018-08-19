@@ -1,4 +1,5 @@
 const React = require('react');
+const Button = require('reactstrap').Button;
 const Collapse = require('reactstrap').Collapse;
 const DropdownItem = require('reactstrap').DropdownItem;
 const DropdownMenu = require('reactstrap').DropdownMenu;
@@ -23,37 +24,22 @@ export class Top extends React.Component {
 
     this.toggle = this.toggle.bind(this);
     this.state = {
-      loggedIn: false,
       isOpen: false
     };
     this.onSuccess = this.onSuccess.bind(this);
     this.onFail = this.onFail.bind(this);
-    // this.logout = this.logout.bind(this);
-    this.fakeLogout = this.fakeLogout.bind(this);
-    this.fakeLogin = this.fakeLogin.bind(this);
+    this.logout = this.logout.bind(this);
   }
   
-  fakeLogin() {
-    // setTimeout(this.props.login, 100);
-    this.props.login();
-  }
-  
-  fakeLogout() {
+  logout() {
     this.props.logout();
-  }
+  };
   
   onSuccess(res) {
     const token = res.headers.get('x-auth-token');
-    res.json().then((user) => { // user :  { id: '81957315', name: 'Scott Lieber' }
+    res.json().then((user) => { // user :  { id: '81957315', displayName: 'Scott Lieber', user: 'smlieber84' }
       if (token) {
-        localStorage.setItem('poll-login', JSON.stringify({ name: user.name, token: token, twitter_id: user.id })); // localStorage can only be set as a string, so we use JSON.stringify
-        this.setState({
-          loggedIn: true,
-          name: user.name,
-          token: token,
-          twitter_id: user.id
-        });
-        this.props.login(token, user.id);
+        this.props.login(token, user.id, user.displayName);
       }
     });
   };
@@ -62,25 +48,6 @@ export class Top extends React.Component {
     console.log(err);
     alert("Unable to log in user");
   };
-  
-  // logout() {
-  //   localStorage.removeItem('poll-login');
-  //   fetch('/logout');
-  //   this.setState({
-  //     loggedIn: false,
-  //     name: "",
-  //     token: "",
-  //     twitter_id: ""
-  //   });
-  // };
-  
-  componentDidMount() {
-    this.setState({
-      loggedIn: this.props.loggedIn,
-      name: this.props.name,
-      token: this.props.token
-    });
-  }
   
   toggle() {
     this.setState({
@@ -91,24 +58,29 @@ export class Top extends React.Component {
     return (
       <div>
         <Navbar color="light" light expand="md">
-          <NavbarBrand href="#"><Link to="/">reactstrap</Link></NavbarBrand>
+          <NavbarBrand href="#"><Link to="/" className="link">Voting Machine</Link></NavbarBrand>
           <NavbarToggler onClick={this.toggle} />
           <Collapse isOpen={this.state.isOpen} navbar>
             <Nav className="ml-auto" navbar>
+              <NavItem><NavLink href="#"><Link to="/" className="link">Home</Link></NavLink></NavItem> 
               { this.props.loggedIn ?
-                <NavItem><NavLink href="#"><Link to="/newpoll">New Poll</Link></NavLink></NavItem> :
+                <NavItem><NavLink href="#"><Link to="/newpoll" className="link">New Poll</Link></NavLink></NavItem> :
                 "" }
               <NavItem>
-                {/* this.props.loggedIn ? <NavLink onClick={ this.fakeLogout } href="#">Log Out</NavLink> :
-                <NavLink onClick={ this.fakeLogin } href="#">Log In</NavLink> */}
                 { this.props.loggedIn ?
-                  <NavLink onClick={ this.fakeLogout } href="#">Log out</NavLink> :
+                  <UncontrolledDropdown nav inNavbar><DropdownToggle nav caret>
+                    { this.props.name }
+                </DropdownToggle><DropdownMenu right>
+                  <DropdownItem>
+                    <Button color="primary" className="logoutbutton" onClick={ this.logout }>Sign Out</Button>
+                    </DropdownItem></DropdownMenu></UncontrolledDropdown> :
                   <TwitterLogin
-                  loginUrl="https://delirious-stem.glitch.me/auth/twitter"
+                  loginUrl="https://voting-machine.glitch.me/auth/twitter"
                   onFailure={ this.onFail }
                   onSuccess={ this.onSuccess }
-                  requestTokenUrl="https://delirious-stem.glitch.me/auth/twitter/reverse"
-                  className="btn-twitter" /> }
+                  requestTokenUrl="https://voting-machine.glitch.me/auth/twitter/reverse"
+                  showIcon={ false }
+                  className="btn btn-primary" /> }
               </NavItem>
             </Nav>
           </Collapse>
