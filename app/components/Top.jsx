@@ -68,12 +68,12 @@ export class Top extends React.Component {
                 "" }
               <NavItem>
                 { this.props.loggedIn ?
-                  <UncontrolledDropdown nav inNavbar><DropdownToggle nav caret>
-                    { this.props.name }
-                </DropdownToggle><DropdownMenu right>
-                  <DropdownItem>
-                    <Button color="primary" className="logoutbutton" onClick={ this.logout }>Sign Out</Button>
-                    </DropdownItem></DropdownMenu></UncontrolledDropdown> :
+                  <UncontrolledDropdown nav inNavbar><DropdownToggle nav caret>{ this.props.name }</DropdownToggle>
+                  <DropdownMenu right>
+                  <DropdownItem><Link to="/mypolls" className="link">My polls</Link></DropdownItem>
+                  <DropdownItem divider />
+                  <DropdownItem><Button color="primary" className="logoutbutton" onClick={ this.logout }>Sign Out</Button></DropdownItem>
+                  </DropdownMenu></UncontrolledDropdown> :
                   <TwitterLogin
                   loginUrl="https://voting-machine.glitch.me/auth/twitter"
                   onFailure={ this.onFail }
